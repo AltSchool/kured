@@ -46,7 +46,9 @@ func (dsl *DaemonSetLock) Acquire(metadata *NodeMeta) (acquired bool, owner stri
 			if err := json.Unmarshal([]byte(valueString), &value); err != nil {
 				return false, "", err
 			}
-			return value.NodeID == dsl.nodeID, value.NodeID, nil
+			if value.Metadata.Expires.After(time.Now()) {
+				return value.NodeID == dsl.nodeID, value.NodeID, nil
+			}
 		}
 
 		if ds.ObjectMeta.Annotations == nil {
